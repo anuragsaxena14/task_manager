@@ -1,6 +1,8 @@
 import os
 from time import gmtime, strftime
+from prettytable import PrettyTable
 from csv import writer
+from csv import DictReader
 
 
 def write(file_name, mode, data):
@@ -13,8 +15,26 @@ def write(file_name, mode, data):
         # the writerow()
         writer_object.writerow(data)
 
-        # Close the file object
-        file.close()
+
+def pretty_print(file_name, user_name):
+
+    # Create a PrettyTable object
+    table = PrettyTable()
+
+    columns_to_include = ['Task Id', 'Task Description', 'Task State', 'Created At', 'Updated At']
+
+    with open(file_name, newline='') as file:
+        file_reader = DictReader(file)
+        headers = [header for header in file_reader.fieldnames if header in columns_to_include]
+        table.field_names = headers
+
+        for row in file_reader:
+            if row['Task Owner'] == user_name:
+                table.add_row([row[column] for column in headers])
+
+    if not table.rows:
+        print("No tasks are present. Table is Empty.")
+    print(table)
 
 
 def read_last_line(file_name):

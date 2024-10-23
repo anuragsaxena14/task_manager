@@ -5,7 +5,7 @@ from task import Task
 
 class TaskManagerAction(Enum):
     ADD_TASK = 1
-    VIEW_TASK = 2
+    LIST_TASKS = 2
     COMPLETE_TASK = 3
     DELETE_TASK = 4
     USER_LOGOUT = 5
@@ -17,8 +17,10 @@ class TaskManager:
     __task_file_name = "task.csv"
     # This file would store user details like username, password etc.
     __user_file_name = "user.csv"
-    __task_file_delimiter = ","
+    __task_file_delimiter = ","  # TODO: make sure delimiter is not present in the task description
     __max_task_id = None
+
+    # TODO: task sate can only change back pending -> from deleted/completed
 
     def __init__(self):
         try:
@@ -27,21 +29,21 @@ class TaskManager:
                 # Get max_task_id
                 last_line = file_utils.read_last_line(self.__data_path + self.__task_file_name)
                 self.__max_task_id = last_line.split(self.__task_file_delimiter)[0]
-                if self.__max_task_id is not type(int):
-                    # File is empty and header data is read, so reset the max_task_id
+                try:
+                    self.__max_task_id = int(self.__max_task_id)  # self.__max_task_id has to be a number
+                except ValueError:
                     self.__max_task_id = 0
-                print(f"max_task_id: {self.__max_task_id}")
             else:
                 # Create user.csv and task.csv if missing
                 file_utils.write(self.__data_path + self.__task_file_name, 'w', Task.get_fields())
                 self.__max_task_id = 0
-            print("Task manager running.")
+            print("#### Task manager is running. ####")
         except Exception as e:
             print(f"Task manager initialization failed: {e}")
 
     @staticmethod
     def show_menu():
-        print("Please select any of the options below:\n"
+        print("\n\nPlease select any of the options below:\n"
               "\tEnter 1 to add a task\n"
               "\tEnter 2 to view tasks\n"
               "\tEnter 3 to mark a task as completed\n"
@@ -61,6 +63,11 @@ class TaskManager:
         except Exception as e:
             print(f"An error occurred: {e}")
 
+    def list_tasks(self, user_name):
+        try:
+            file_utils.pretty_print(self.__data_path + self.__task_file_name, user_name)
+        except Exception as e:
+            print(f"An error occurred: {e.with_traceback()}")
 
 if __name__ == "__main__":
 
@@ -86,14 +93,14 @@ if __name__ == "__main__":
 
         if user_input == TaskManagerAction.ADD_TASK.value:
             task_manager.add_task(username)
-        elif user_input == TaskManagerAction.VIEW_TASK.value:
-            print("Viewing a task")
+        elif user_input == TaskManagerAction.LIST_TASKS.value:
+            task_manager.list_tasks(username)
         elif user_input == TaskManagerAction.COMPLETE_TASK.value:
             print("Completing a task")
         elif user_input == TaskManagerAction.DELETE_TASK.value:
             print("Deleting a task")
         elif user_input == TaskManagerAction.USER_LOGOUT.value:
-            print("User logged out")
+            print("User logged out.")
             break
         else:
             print("Please choose a valid option.")  # Input has to be a valid selection
