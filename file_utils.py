@@ -3,6 +3,8 @@ from time import gmtime, strftime
 from prettytable import PrettyTable
 from csv import writer
 from csv import DictReader
+from task import Task
+from task import TaskState
 
 
 def write(file_name, mode, data):
@@ -16,26 +18,46 @@ def write(file_name, mode, data):
         writer_object.writerow(data)
 
 
-def pretty_print(file_name, user_name):
+def get_static_values(file_name, filter_header=None, filter_value=None):
+    tasks = []
+    static_fields = Task.get_static_fields()
+    with open(file_name, 'r', newline='') as file:
+        file_reader = DictReader(file)
+        for row in file_reader:
+            if filter_header is not None and filter_value is not None and row[static_fields[1]] == filter_value:
+                task = Task(row[static_fields[0]],
+                            user_name=row[static_fields[1]],
+                            desc=row[static_fields[2]],
+                            state=TaskState.PENDING.name,
+                            created_at=row[static_fields[3]],
+                            updated_at=row[static_fields[3]])  # updated_at is same as created_at when object is created
+                tasks.append(task)
+    return tasks
+
+
+def get_variable_values(file_name):
+    task_updates = {}
+    variable_fields = Task.get_variable_fields()
+    with open(file_name, 'r', newline='') as file:
+        file_reader = DictReader(file)
+        for row in file_reader:
+            task = Task(row[variable_fields[0]],
+                        state=row[variable_fields[1]],
+                        updated_at=row[variable_fields[2]])
+            task_updates[row[variable_fields[0]]] = task
+    return task_updates
+
+
+def pretty_print(tasks, headers):
 
     # Create a PrettyTable object
     table = PrettyTable()
+    table.field_names = headers
 
-    columns_to_include = ['Task Id', 'Task Description', 'Task State', 'Created At', 'Updated At']
+    for task in tasks:
+        table.add_row([task.id, task.desc, task.state, task.created_at, task.updated_at])
 
-    with open(file_name, newline='') as file:
-        file_reader = DictReader(file)
-        headers = [header for header in file_reader.fieldnames if header in columns_to_include]
-        table.field_names = headers
-
-        for row in file_reader:
-            if row['Task Owner'] == user_name:
-                table.add_row([row[column] for column in headers])
-
-    if not table.rows:
-        print("No tasks are present. Table is Empty.")
     print(table)
-
 
 def read_last_line(file_name):
     with open(file_name, 'rb') as file:

@@ -9,28 +9,28 @@ class TaskState(Enum):
 
 
 class Task:
-    def __init__(self, task_id, user_name, desc, state=None, created_at=None, updated_at=None):
-        self.__id = task_id
-        self.__user_name = user_name
-        self.__desc = desc
-        self.__state = state
-        self.__created_at = created_at
-        self.__updated_at = updated_at
+    def __init__(self, task_id, user_name=None, desc=None, state=None, created_at=None, updated_at=None):
+        self.id = task_id
 
-        if self.__state is None:
-            self.__state = TaskState.PENDING
+        if user_name is not None:
+            self.user_name = user_name
 
-        current_time = file_utils.get_curr_time()
-        if self.__created_at is None:
-            self.__created_at = current_time
+        if desc is not None:
+            self.desc = desc
 
-        if self.__updated_at is None:
-            self.__updated_at = current_time
+        if state is not None:
+            self.state = state
+
+        if created_at is not None:
+            self.created_at = created_at
+
+        if updated_at is not None:
+            self.updated_at = updated_at
 
     def update(self, state):
         if type(state) is TaskState:
-            self.__state = state
-            self.__updated_at = file_utils.get_curr_time()
+            self.state = state
+            self.updated_at = file_utils.get_curr_time()
             return True
         else:
             print("The parameter passed is not of type TaskState.")
@@ -38,12 +38,23 @@ class Task:
 
     def __str__(self):
         return "{}, {}, {}, {}, {}, {}".format(
-            self.__id, self.__user_name, self.__desc, self.__state.name, self.__created_at, self.__updated_at
+            self.__id, self.user_name, self.desc, self.state.name, self.created_at, self.updated_at
         )
 
     @staticmethod
-    def get_fields():
-        return ['Task Id', 'Task Owner', 'Task Description', 'Task State', 'Created At', 'Updated At']
+    def get_static_fields():
+        return ['Task Id', 'Task Owner', 'Task Description', 'Created At']
 
-    def get_values(self):
-        return [self.__id, self.__user_name, self.__desc, self.__state.name, self.__created_at, self.__updated_at]
+    @staticmethod
+    def get_variable_fields():
+        return ['Task Id', 'Task State', 'Updated At']
+
+    @staticmethod
+    def get_printable_fields():
+        return ['Task Id', 'Task Description', 'Task State', 'Created At', 'Updated At']
+
+    def get_static_field_values(self):
+        return [self.id, self.user_name, self.desc,  self.created_at]
+
+    def get_variable_field_values(self):
+        return [self.id, self.state, self.updated_at]
