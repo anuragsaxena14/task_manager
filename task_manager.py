@@ -155,22 +155,30 @@ class TaskManager:
                     continue
                 break
 
-            # State of a task can't be changed if task is already in COMPLETED or DELETED state
-            if task_id not in self.__task_update_cache:
-                task = Task(task_id, state=new_state, updated_at=file_utils.get_curr_time())
-                # Save task's variable details
+            if task_id in self.__task_update_cache:
+                if not bool(self.__task_update_cache[int(task_id)]):
+                    print(f"Task #{task_id} has already been deleted.")
+                else:
+                    if TaskState.COMPLETED.name == new_state:
+                        print(f"Task #{task_id} has already been marked completed.")
+                    elif TaskState.DELETED.name == new_state:
+                        file_utils.write(self.__task_update_file_path, 'a',
+                                         [task_id, new_state, file_utils.get_curr_time()],
+                                         self.__task_delimiter
+                                         )
+                        self.__task_update_cache[int(task_id)] = False
+                        print(f"Task #{task_id} deleted successfully.")
+            else:
                 file_utils.write(self.__task_update_file_path, 'a',
-                                 task.get_variable_field_values(), self.__task_delimiter)
+                                 [task_id, new_state, file_utils.get_curr_time()],
+                                 self.__task_delimiter
+                                 )
                 if TaskState.COMPLETED.name == new_state:
                     self.__task_update_cache[int(task_id)] = True
                     print(f"Task #{task_id} marked completed.")
                 elif TaskState.DELETED.name == new_state:
                     self.__task_update_cache[int(task_id)] = False
                     print(f"Task #{task_id} deleted successfully.")
-            else:
-                task_bool_state = bool(self.__task_update_cache[task_id])
-                task_state = TaskState.COMPLETED.name.lower() if task_bool_state else TaskState.DELETED.name.lower()
-                print(f"Task #{task_id} has already been {task_state}.")
 
         except Exception as e:
             print(f"An error occurred: {e}")
