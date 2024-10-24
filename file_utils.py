@@ -68,6 +68,29 @@ def read_last_line(file_name):
         return last_line
 
 
+def is_value_unique(filename, delimiter, value_to_find, value_header):
+    with open(filename, 'r') as file:
+        reader = DictReader(file, delimiter=delimiter)
+        for row in reader:
+            if row[value_header] == value_to_find:
+                return False
+    return True
+
+
+def match_values(filename, delimiter, values_to_match, value_headers):
+    value_match = [False, False]
+    with open(filename, 'r') as file:
+        reader = DictReader(file, delimiter=delimiter)
+        for row in reader:
+            value_match = [False, False]
+            if row[value_headers[0]] == values_to_match[0]:
+                value_match[0] = True
+                if row[value_headers[1]] == values_to_match[1]:
+                    value_match[1] = True
+                break
+        return value_match
+
+
 def get_curr_time():
     return strftime("%Y-%m-%d %H:%M:%S GMT", gmtime())
 

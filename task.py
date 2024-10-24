@@ -1,5 +1,4 @@
 from enum import Enum
-import file_utils
 
 
 class TaskState(Enum):
@@ -27,19 +26,14 @@ class Task:
         if updated_at is not None:
             self.updated_at = updated_at
 
-    def update(self, state):
-        if type(state) is TaskState:
-            self.state = state
-            self.updated_at = file_utils.get_curr_time()
-            return True
-        else:
-            print("The parameter passed is not of type TaskState.")
-            return False
-
     def __str__(self):
         return "{}, {}, {}, {}, {}, {}".format(
-            self.__id, self.user_name, self.desc, self.state.name, self.created_at, self.updated_at
+            self.id, self.user_name, self.desc, self.state.name, self.created_at, self.updated_at
         )
+
+    # TODO: Map these header values to fields using a static map and use that map to refer headers
+    # TODO: turn fields to private
+    # TODO: instead of 1 single init, see if multiple methods can be made
 
     @staticmethod
     def get_static_fields():

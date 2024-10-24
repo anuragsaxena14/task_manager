@@ -2,6 +2,7 @@ import file_utils
 from enum import Enum
 from task import Task
 from task import TaskState
+from auth_manager import AuthManager
 
 
 class TaskManagerAction(Enum):
@@ -43,8 +44,8 @@ class TaskManager:
                     file_utils.write(self.__task_update_file_path, 'w',
                                      Task.get_variable_fields(), self.__task_delimiter)
             else:
-                # Create user.csv and task.csv if missing
-                # task_update.csv will be recreated if task.csv is missing or empty
+                # Create task.csv if missing
+                # task_update.csv will also be recreated if task.csv is missing or empty
                 file_utils.write(self.__task_file_path, 'w', Task.get_static_fields(), self.__task_delimiter)
                 file_utils.write(self.__task_update_file_path, 'w', Task.get_variable_fields(), self.__task_delimiter)
                 self.__max_task_id = 0
@@ -66,16 +67,6 @@ class TaskManager:
                 self.__task_update_cache[int(task_id)] = True
             elif TaskState.DELETED.name == task.state:
                 self.__task_update_cache[int(task_id)] = False
-
-    @staticmethod
-    def show_menu():
-        print("\n\nPlease select any of the options below:\n"
-              "\tEnter 1 to add a task\n"
-              "\tEnter 2 to view tasks\n"
-              "\tEnter 3 to mark a task as completed\n"
-              "\tEnter 4 to delete a task\n"
-              "\tEnter 5 to logout\n"
-              )
 
     def add_task(self, user_name):
         try:
@@ -163,7 +154,7 @@ class TaskManager:
                     print("Invalid task id. No such task is present. Please re-enter: ")
                     continue
                 break
-                
+
             # State of a task can't be changed if task is already in COMPLETED or DELETED state
             if task_id not in self.__task_update_cache:
                 task = Task(task_id, state=new_state, updated_at=file_utils.get_curr_time())
@@ -185,39 +176,53 @@ class TaskManager:
             print(f"An error occurred: {e}")
 
 
-if __name__ == "__main__":
-
-    task_manager = TaskManager()
-    # Authenticate  the user
-    username = "anuragsaxena"
-
+def get_user_input():
+    print("\n\nPlease select any of the options below:\n"
+          "\tEnter 1 to add a task\n"
+          "\tEnter 2 to view tasks\n"
+          "\tEnter 3 to mark a task as completed\n"
+          "\tEnter 4 to delete a task\n"
+          "\tEnter 5 to logout\n"
+          )
     while True:
-        TaskManager.show_menu()
-        user_input = input("Your selection: ")
+        __user_input = input("Your selection: ")
 
-        if not isinstance(user_input, str):  # Input has to be a valid string
-            print("The selection was invalid. Please enter an integer.")
+        if not isinstance(__user_input, str):  # Input has to be a valid string
+            print("The selection was invalid. Please enter a valid string.")
             continue
 
         try:
-            user_input = int(user_input)  # Input has to be an integer
+            __user_input = int(__user_input)  # Input has to be an integer
         except ValueError:
             print("The selection was invalid. Please enter an integer.")
             continue
 
-        user_input = int(user_input)  # Converting to integer as it is a valid number at this point
+        return __user_input
 
-        if user_input == TaskManagerAction.ADD_TASK.value:
-            task_manager.add_task(username)
-        elif user_input == TaskManagerAction.LIST_TASKS.value:
-            task_manager.list_tasks(username)
-        elif user_input == TaskManagerAction.COMPLETE_TASK.value:
-            task_manager.update_task(TaskState.COMPLETED.name)
-        elif user_input == TaskManagerAction.DELETE_TASK.value:
-            task_manager.update_task(TaskState.DELETED.name)
-        elif user_input == TaskManagerAction.USER_LOGOUT.value:
-            print("User logged out.")
-            break
-        else:
-            print("Please choose a valid option.")  # Input has to be a valid selection
-    print("GoodBye!")
+
+if __name__ == "__main__":
+
+    # Start the auth manager
+    auth_manager = AuthManager()
+    username = auth_manager.authenticate()
+    if not username:  # No username means auth failed or the user chose to exit
+        print("Exiting the application.\nGoodBye!")
+    else:
+        # Start the task manager
+        task_manager = TaskManager()
+        while True:
+            user_input = get_user_input()
+            if user_input == TaskManagerAction.ADD_TASK.value:
+                task_manager.add_task(username)
+            elif user_input == TaskManagerAction.LIST_TASKS.value:
+                task_manager.list_tasks(username)
+            elif user_input == TaskManagerAction.COMPLETE_TASK.value:
+                task_manager.update_task(TaskState.COMPLETED.name)
+            elif user_input == TaskManagerAction.DELETE_TASK.value:
+                task_manager.update_task(TaskState.DELETED.name)
+            elif user_input == TaskManagerAction.USER_LOGOUT.value:
+                print("User logged out.")
+                break
+            else:
+                print("Please choose a valid option.")  # Input has to be a valid selection
+        print("Exiting the application.\nGoodBye!")
