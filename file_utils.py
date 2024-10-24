@@ -1,28 +1,21 @@
 import os
 from time import gmtime, strftime
 from prettytable import PrettyTable
-from csv import writer
-from csv import DictReader
-from task import Task
-from task import TaskState
+from csv import DictReader, writer
+from task import Task, TaskState
 
 
-def write(file_name, mode, data):
+def write(file_name, mode, data, delimiter):
     with open(file_name, mode) as file:
-
-        # Pass this file object to csv.writer()
-        # and get a writer object
-        writer_object = writer(file)
-        # Pass the list as an argument into
-        # the writerow()
-        writer_object.writerow(data)
+        file_writer = writer(file, delimiter=delimiter)
+        file_writer.writerow(data)
 
 
-def get_static_values(file_name, filter_header=None, filter_value=None):
+def get_static_values(file_name, delimiter, filter_header=None, filter_value=None):
     tasks = []
     static_fields = Task.get_static_fields()
     with open(file_name, 'r', newline='') as file:
-        file_reader = DictReader(file)
+        file_reader = DictReader(file, delimiter=delimiter)
         for row in file_reader:
             if filter_header is not None and filter_value is not None and row[static_fields[1]] == filter_value:
                 task = Task(row[static_fields[0]],
@@ -35,11 +28,11 @@ def get_static_values(file_name, filter_header=None, filter_value=None):
     return tasks
 
 
-def get_variable_values(file_name):
+def get_variable_values(file_name, delimiter):
     task_updates = {}
     variable_fields = Task.get_variable_fields()
     with open(file_name, 'r', newline='') as file:
-        file_reader = DictReader(file)
+        file_reader = DictReader(file, delimiter=delimiter)
         for row in file_reader:
             task = Task(row[variable_fields[0]],
                         state=row[variable_fields[1]],
@@ -58,6 +51,7 @@ def pretty_print(tasks, headers):
         table.add_row([task.id, task.desc, task.state, task.created_at, task.updated_at])
 
     print(table)
+
 
 def read_last_line(file_name):
     with open(file_name, 'rb') as file:
