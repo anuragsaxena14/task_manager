@@ -7,5 +7,5 @@ class User:
         return "{}, {}, {}, {}".format(self.user_name, self.__password)
 
     @staticmethod
-    def get_headers():
-        return ['Username', 'Password']
+    def field_to_header_mapping():
+        return [('__user_name', 'Username'), ('__password', 'Password')]

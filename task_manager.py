@@ -16,17 +16,26 @@ class TaskManagerAction(Enum):
 class TaskManager:
 
     # This file would store the static task details like task_id, task_desc etc.
-    __task_file_path = "./data/task.csv"
+    __task_file_path = "./task.csv"
     # This file would store the variable task details like task_id, task_desc etc.
-    __task_update_file_path = "./data/task_update.csv"
-    # This file would store user details like username, password etc.
-    __user_file_name = "user.csv"
+    __task_update_file_path = "./task_update.csv"
     __task_delimiter = "|"
     __task_description_max_length = 255
     __max_task_id = None
     __task_update_cache = {}
 
-    # TODO: task sate can only change back pending -> from deleted/completed
+    # ['Task Id', 'Task Owner', 'Task Description', 'Created At']
+    __task_static_field_list = [Task.field_to_header_mapping()[0][1], Task.field_to_header_mapping()[1][1],
+                                Task.field_to_header_mapping()[2][1], Task.field_to_header_mapping()[4][1]]
+
+    # ['Task Id', 'Task State', 'Updated At']
+    __task_variable_field_list = [Task.field_to_header_mapping()[0][1], Task.field_to_header_mapping()[3][1],
+                                  Task.field_to_header_mapping()[5][1]]
+
+    # ['Task Id', 'Task Description', 'Task State', 'Created At', 'Updated At']
+    __task_display_field_list = [Task.field_to_header_mapping()[0][1], Task.field_to_header_mapping()[2][1],
+                                 Task.field_to_header_mapping()[3][1], Task.field_to_header_mapping()[4][1],
+                                 Task.field_to_header_mapping()[5][1]]
 
     def __init__(self):
         try:
@@ -42,12 +51,12 @@ class TaskManager:
 
                     # task_update.csv will be recreated if task.csv has only headers
                     file_utils.write(self.__task_update_file_path, 'w',
-                                     Task.get_variable_fields(), self.__task_delimiter)
+                                     self.__task_variable_field_list, self.__task_delimiter)
             else:
                 # Create task.csv if missing
                 # task_update.csv will also be recreated if task.csv is missing or empty
-                file_utils.write(self.__task_file_path, 'w', Task.get_static_fields(), self.__task_delimiter)
-                file_utils.write(self.__task_update_file_path, 'w', Task.get_variable_fields(), self.__task_delimiter)
+                file_utils.write(self.__task_file_path, 'w', self.__task_static_field_list, self.__task_delimiter)
+                file_utils.write(self.__task_update_file_path, 'w', self.__task_variable_field_list, self.__task_delimiter)
                 self.__max_task_id = 0
 
             self.__load_cache()  # Load cache
@@ -62,7 +71,7 @@ class TaskManager:
 
     def __load_task_updates(self):
         task_updates = file_utils.get_variable_values(self.__task_update_file_path, self.__task_delimiter,
-                                                      Task.get_variable_fields())
+                                                      self.__task_variable_field_list)
         for task_id, task in task_updates.items():
             if TaskState.COMPLETED.name == task.state:
                 self.__task_update_cache[int(task_id)] = True
@@ -106,12 +115,12 @@ class TaskManager:
             all_tasks = file_utils.get_static_values(
                 self.__task_file_path,
                 self.__task_delimiter,
-                Task.get_static_fields(),
+                self.__task_static_field_list,
                 'Task Owner',
                 user_name
             )
             task_updates = file_utils.get_variable_values(self.__task_update_file_path, self.__task_delimiter,
-                                                          Task.get_variable_fields())
+                                                          self.__task_variable_field_list)
 
             if not task_updates:
                 tasks_to_show = all_tasks
@@ -126,7 +135,7 @@ class TaskManager:
                     tasks_to_show.append(task)
 
             # Pretty Print the tasks
-            file_utils.pretty_print(tasks_to_show, Task.get_printable_fields())
+            file_utils.pretty_print(tasks_to_show, self.__task_display_field_list)
         except Exception as e:
             print(f"An error occurred: {e.with_traceback()}")
 

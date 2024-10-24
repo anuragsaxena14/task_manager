@@ -13,8 +13,11 @@ class AuthenticationMode(Enum):
 class AuthManager:
 
     # This file would store the user details like username, password.
-    __user_file_path = "./data/user.csv"
+    __user_file_path = "./user.csv"
     __user_delimiter = "|"
+
+    # ['Username','Password']
+    __user_display_field_list = [User.field_to_header_mapping()[0][1], User.field_to_header_mapping()[1][1]]
 
     def __init__(self):
         try:
@@ -22,7 +25,7 @@ class AuthManager:
             create_user_file = (not is_user_file_present) or file_utils.is_file_empty(self.__user_file_path)
             if create_user_file:
                 # Create user.csv with headers
-                file_utils.write(self.__user_file_path, 'w', User.get_headers(), self.__user_delimiter)
+                file_utils.write(self.__user_file_path, 'w', self.__user_display_field_list, self.__user_delimiter)
 
             print("#### Auth manager is running. ####")
         except Exception as e:
@@ -40,7 +43,7 @@ class AuthManager:
     def __register(self):
         username = input("Enter a unique username: ")
         if not file_utils.is_value_unique(self.__user_file_path, self.__user_delimiter,
-                                          username, User.get_headers()[0]):
+                                          username, self.__user_display_field_list[0]):
             print("Username already exists. User registration failed.")
             return
         password = input("Enter a password: ")
@@ -71,7 +74,7 @@ class AuthManager:
 
     def __match_credentials(self, username, hashed_password):
         return file_utils.match_values(self.__user_file_path, self.__user_delimiter,
-                                       [username, hashed_password], User.get_headers())
+                                       [username, hashed_password], self.__user_display_field_list)
 
 
 def get_auth_mode_input():

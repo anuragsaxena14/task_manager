@@ -85,19 +85,7 @@ class Task:
             self.__id, self.__user_name, self.__desc, self.__state.name, self.__created_at, self.__updated_at
         )
 
-    # TODO: Map these header values to fields using a static map and use that map to refer headers
-    # TODO: instead of 1 single init, see if multiple methods can be made
-
     @staticmethod
-    def get_static_fields():
-        return ['Task Id', 'Task Owner', 'Task Description', 'Created At']
-
-    @staticmethod
-    def get_variable_fields():
-        return ['Task Id', 'Task State', 'Updated At']
-
-    @staticmethod
-    def get_printable_fields():
-        return ['Task Id', 'Task Description', 'Task State', 'Created At', 'Updated At']
-
-
+    def field_to_header_mapping():
+        return [('__id', 'Task Id'), ('__user_name', 'Task Owner'), ('__desc', 'Task Description'),
+                ('__state', 'Task State'), ('__created_at', 'Created At'), ('__updated_at', 'Updated At')]
