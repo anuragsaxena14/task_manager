@@ -89,14 +89,11 @@ class TaskManager:
                     continue
                 break
 
-            task = Task(
-                self.__max_task_id + 1,
-                user_name=user_name,
-                desc=task_desc,
-                created_at=file_utils.get_curr_time()
-            )
             # Save task's static details
-            file_utils.write(self.__task_file_path, 'a', task.get_static_field_values(), self.__task_delimiter)
+            file_utils.write(self.__task_file_path, 'a',
+                             [self.__max_task_id + 1, user_name, task_desc,  file_utils.get_curr_time()],
+                             self.__task_delimiter
+                             )
             self.__max_task_id += 1
             print(f"Task #{self.__max_task_id} added successfully.")
         except Exception as e:

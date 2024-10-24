@@ -47,8 +47,4 @@ class Task:
     def get_printable_fields():
         return ['Task Id', 'Task Description', 'Task State', 'Created At', 'Updated At']
 
-    def get_static_field_values(self):
-        return [self.id, self.user_name, self.desc,  self.created_at]
 
-    def get_variable_field_values(self):
-        return [self.id, self.state, self.updated_at]
