@@ -11,9 +11,8 @@ def write(file_name, mode, data, delimiter):
         file_writer.writerow(data)
 
 
-def get_static_values(file_name, delimiter, filter_header=None, filter_value=None):
+def get_static_values(file_name, delimiter, static_fields, filter_header, filter_value):
     tasks = []
-    static_fields = Task.get_static_fields()
     with open(file_name, 'r', newline='') as file:
         file_reader = DictReader(file, delimiter=delimiter)
         for row in file_reader:
@@ -28,9 +27,8 @@ def get_static_values(file_name, delimiter, filter_header=None, filter_value=Non
     return tasks
 
 
-def get_variable_values(file_name, delimiter):
+def get_variable_values(file_name, delimiter, variable_fields):
     task_updates = {}
-    variable_fields = Task.get_variable_fields()
     with open(file_name, 'r', newline='') as file:
         file_reader = DictReader(file, delimiter=delimiter)
         for row in file_reader:

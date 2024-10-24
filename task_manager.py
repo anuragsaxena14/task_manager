@@ -61,7 +61,8 @@ class TaskManager:
         self.__load_task_updates()
 
     def __load_task_updates(self):
-        task_updates = file_utils.get_variable_values(self.__task_update_file_path, self.__task_delimiter)
+        task_updates = file_utils.get_variable_values(self.__task_update_file_path, self.__task_delimiter,
+                                                      Task.get_variable_fields())
         for task_id, task in task_updates.items():
             if TaskState.COMPLETED.name == task.state:
                 self.__task_update_cache[int(task_id)] = True
@@ -105,16 +106,18 @@ class TaskManager:
             all_tasks = file_utils.get_static_values(
                 self.__task_file_path,
                 self.__task_delimiter,
+                Task.get_static_fields(),
                 'Task Owner',
                 user_name
             )
-            task_updates = file_utils.get_variable_values(self.__task_update_file_path, self.__task_delimiter)
+            task_updates = file_utils.get_variable_values(self.__task_update_file_path, self.__task_delimiter,
+                                                          Task.get_variable_fields())
 
             if not task_updates:
                 tasks_to_show = all_tasks
             else:
                 for task in all_tasks:
-                    if task_updates.get(task.id) is not None:  # one task can only have one entry in task_update.csv
+                    if task_updates.get(task.id) is not None:  # one task can only have one entry in task_updates
                         if TaskState.DELETED.name == task_updates[task.id].state:
                             continue
                         else:
