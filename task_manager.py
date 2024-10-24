@@ -1,8 +1,7 @@
-import file_utils
+import utils
 from enum import Enum
 from task import Task
 from task import TaskState
-from auth_manager import AuthManager
 
 
 class TaskManagerAction(Enum):
@@ -39,10 +38,10 @@ class TaskManager:
 
     def __init__(self):
         try:
-            if (file_utils.is_file_present(self.__task_file_path)
-                    and not file_utils.is_file_empty(self.__task_file_path)):
+            if (utils.is_file_present(self.__task_file_path)
+                    and not utils.is_file_empty(self.__task_file_path)):
                 # Get max_task_id
-                last_line = file_utils.read_last_line(self.__task_file_path)
+                last_line = utils.read_last_line(self.__task_file_path)
                 self.__max_task_id = last_line.split(self.__task_delimiter)[0]
                 try:
                     self.__max_task_id = int(self.__max_task_id)  # self.__max_task_id has to be a number
@@ -50,13 +49,13 @@ class TaskManager:
                     self.__max_task_id = 0
 
                     # task_update.csv will be recreated if task.csv has only headers
-                    file_utils.write(self.__task_update_file_path, 'w',
+                    utils.write(self.__task_update_file_path, 'w',
                                      self.__task_variable_field_list, self.__task_delimiter)
             else:
                 # Create task.csv if missing
                 # task_update.csv will also be recreated if task.csv is missing or empty
-                file_utils.write(self.__task_file_path, 'w', self.__task_static_field_list, self.__task_delimiter)
-                file_utils.write(self.__task_update_file_path, 'w', self.__task_variable_field_list, self.__task_delimiter)
+                utils.write(self.__task_file_path, 'w', self.__task_static_field_list, self.__task_delimiter)
+                utils.write(self.__task_update_file_path, 'w', self.__task_variable_field_list, self.__task_delimiter)
                 self.__max_task_id = 0
 
             self.__load_cache()  # Load cache
@@ -70,7 +69,7 @@ class TaskManager:
         self.__load_task_updates()
 
     def __load_task_updates(self):
-        task_updates = file_utils.get_variable_values(self.__task_update_file_path, self.__task_delimiter,
+        task_updates = utils.get_variable_values(self.__task_update_file_path, self.__task_delimiter,
                                                       self.__task_variable_field_list)
         for task_id, task in task_updates.items():
             if TaskState.COMPLETED.name == task.state:
@@ -78,7 +77,7 @@ class TaskManager:
             elif TaskState.DELETED.name == task.state:
                 self.__task_update_cache[int(task_id)] = False
 
-    def add_task(self, user_name):
+    def __add_task(self, user_name):
         try:
             # Task description can not
             #   1. be empty or
@@ -100,8 +99,8 @@ class TaskManager:
                 break
 
             # Save task's static details
-            file_utils.write(self.__task_file_path, 'a',
-                             [self.__max_task_id + 1, user_name, task_desc,  file_utils.get_curr_time()],
+            utils.write(self.__task_file_path, 'a',
+                             [self.__max_task_id + 1, user_name, task_desc,  utils.get_curr_time()],
                              self.__task_delimiter
                              )
             self.__max_task_id += 1
@@ -109,17 +108,17 @@ class TaskManager:
         except Exception as e:
             print(f"An error occurred: {e}")
 
-    def list_tasks(self, user_name):
+    def __list_tasks(self, user_name):
         try:
             tasks_to_show = []
-            all_tasks = file_utils.get_static_values(
+            all_tasks = utils.get_static_values(
                 self.__task_file_path,
                 self.__task_delimiter,
                 self.__task_static_field_list,
                 'Task Owner',
                 user_name
             )
-            task_updates = file_utils.get_variable_values(self.__task_update_file_path, self.__task_delimiter,
+            task_updates = utils.get_variable_values(self.__task_update_file_path, self.__task_delimiter,
                                                           self.__task_variable_field_list)
 
             if not task_updates:
@@ -135,11 +134,11 @@ class TaskManager:
                     tasks_to_show.append(task)
 
             # Pretty Print the tasks
-            file_utils.pretty_print(tasks_to_show, self.__task_display_field_list)
+            utils.pretty_print(tasks_to_show, self.__task_display_field_list)
         except Exception as e:
             print(f"An error occurred: {e.with_traceback()}")
 
-    def update_task(self, new_state):
+    def __update_task(self, new_state):
         try:
             #   1. Task id can not be empty
             #   2. Task id has to be an integer
@@ -171,15 +170,15 @@ class TaskManager:
                     if TaskState.COMPLETED.name == new_state:
                         print(f"Task #{task_id} has already been marked completed.")
                     elif TaskState.DELETED.name == new_state:
-                        file_utils.write(self.__task_update_file_path, 'a',
-                                         [task_id, new_state, file_utils.get_curr_time()],
+                        utils.write(self.__task_update_file_path, 'a',
+                                         [task_id, new_state, utils.get_curr_time()],
                                          self.__task_delimiter
                                          )
                         self.__task_update_cache[int(task_id)] = False
                         print(f"Task #{task_id} deleted successfully.")
             else:
-                file_utils.write(self.__task_update_file_path, 'a',
-                                 [task_id, new_state, file_utils.get_curr_time()],
+                utils.write(self.__task_update_file_path, 'a',
+                                 [task_id, new_state, utils.get_curr_time()],
                                  self.__task_delimiter
                                  )
                 if TaskState.COMPLETED.name == new_state:
@@ -192,54 +191,43 @@ class TaskManager:
         except Exception as e:
             print(f"An error occurred: {e}")
 
-
-def get_user_input():
-    print("\n\nPlease select any of the options below:\n"
-          "\tEnter 1 to add a task\n"
-          "\tEnter 2 to view tasks\n"
-          "\tEnter 3 to mark a task as completed\n"
-          "\tEnter 4 to delete a task\n"
-          "\tEnter 5 to logout\n"
-          )
-    while True:
-        __user_input = input("Your selection: ")
-
-        if not isinstance(__user_input, str):  # Input has to be a valid string
-            print("The selection was invalid. Please enter a valid string.")
-            continue
-
-        try:
-            __user_input = int(__user_input)  # Input has to be an integer
-        except ValueError:
-            print("The selection was invalid. Please enter an integer.")
-            continue
-
-        return __user_input
-
-
-if __name__ == "__main__":
-
-    # Start the auth manager
-    auth_manager = AuthManager()
-    username = auth_manager.authenticate()
-    if not username:  # No username means auth failed or the user chose to exit
-        print("Exiting the application.\nGoodBye!")
-    else:
-        # Start the task manager
-        task_manager = TaskManager()
+    def run(self, username):
         while True:
-            user_input = get_user_input()
-            if user_input == TaskManagerAction.ADD_TASK.value:
-                task_manager.add_task(username)
-            elif user_input == TaskManagerAction.LIST_TASKS.value:
-                task_manager.list_tasks(username)
-            elif user_input == TaskManagerAction.COMPLETE_TASK.value:
-                task_manager.update_task(TaskState.COMPLETED.name)
-            elif user_input == TaskManagerAction.DELETE_TASK.value:
-                task_manager.update_task(TaskState.DELETED.name)
-            elif user_input == TaskManagerAction.USER_LOGOUT.value:
+            action_input = TaskManager.get_task_manager_action()
+            if action_input == TaskManagerAction.ADD_TASK.value:
+                self.__add_task(username)
+            elif action_input == TaskManagerAction.LIST_TASKS.value:
+                self.__list_tasks(username)
+            elif action_input == TaskManagerAction.COMPLETE_TASK.value:
+                self.__update_task(TaskState.COMPLETED.name)
+            elif action_input == TaskManagerAction.DELETE_TASK.value:
+                self.__update_task(TaskState.DELETED.name)
+            elif action_input == TaskManagerAction.USER_LOGOUT.value:
                 print("User logged out.")
                 break
             else:
                 print("Please choose a valid option.")  # Input has to be a valid selection
-        print("Exiting the application.\nGoodBye!")
+
+    @staticmethod
+    def get_task_manager_action():
+        print("\n\nPlease select any of the options below:\n"
+              "\tEnter 1 to add a task\n"
+              "\tEnter 2 to view tasks\n"
+              "\tEnter 3 to mark a task as completed\n"
+              "\tEnter 4 to delete a task\n"
+              "\tEnter 5 to logout\n"
+              )
+        while True:
+            __task_manager_action = input("Your selection: ")
+
+            if not isinstance(__task_manager_action, str):  # Input has to be a valid string
+                print("The selection was invalid. Please enter a valid string.")
+                continue
+
+            try:
+                __task_manager_action = int(__task_manager_action)  # Input has to be an integer
+            except ValueError:
+                print("The selection was invalid. Please enter an integer.")
+                continue
+
+            return __task_manager_action

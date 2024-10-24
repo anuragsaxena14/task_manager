@@ -1,5 +1,5 @@
 from enum import Enum
-import file_utils
+import utils
 from user import User
 import hashlib
 
@@ -21,18 +21,18 @@ class AuthManager:
 
     def __init__(self):
         try:
-            is_user_file_present = file_utils.is_file_present(self.__user_file_path)
-            create_user_file = (not is_user_file_present) or file_utils.is_file_empty(self.__user_file_path)
+            is_user_file_present = utils.is_file_present(self.__user_file_path)
+            create_user_file = (not is_user_file_present) or utils.is_file_empty(self.__user_file_path)
             if create_user_file:
                 # Create user.csv with headers
-                file_utils.write(self.__user_file_path, 'w', self.__user_display_field_list, self.__user_delimiter)
+                utils.write(self.__user_file_path, 'w', self.__user_display_field_list, self.__user_delimiter)
 
             print("#### Auth manager is running. ####")
         except Exception as e:
             print(f"Auth manager initialization failed: {e}")
 
-    def authenticate(self):
-        auth_mode = get_auth_mode_input()
+    def run(self):
+        auth_mode = AuthManager.get_auth_mode_input()
 
         if auth_mode == AuthenticationMode.LOGIN.value:
             return self.__login()
@@ -42,13 +42,13 @@ class AuthManager:
 
     def __register(self):
         username = input("Enter a unique username: ")
-        if not file_utils.is_value_unique(self.__user_file_path, self.__user_delimiter,
+        if not utils.is_value_unique(self.__user_file_path, self.__user_delimiter,
                                           username, self.__user_display_field_list[0]):
             print("Username already exists. User registration failed.")
             return
         password = input("Enter a password: ")
         hashed_password = self.__hash_password(password)
-        file_utils.write(self.__user_file_path, 'a', [username, hashed_password], self.__user_delimiter)
+        utils.write(self.__user_file_path, 'a', [username, hashed_password], self.__user_delimiter)
         print("User registration successful.")
         return username
 
@@ -73,31 +73,31 @@ class AuthManager:
         return hashlib.sha256(password.encode('utf-8')).hexdigest()
 
     def __match_credentials(self, username, hashed_password):
-        return file_utils.match_values(self.__user_file_path, self.__user_delimiter,
+        return utils.match_values(self.__user_file_path, self.__user_delimiter,
                                        [username, hashed_password], self.__user_display_field_list)
 
+    @staticmethod
+    def get_auth_mode_input():
+        print("\n\nPlease select one of the modes below to authenticate:\n"
+              "\tEnter 1 to login\n"
+              "\tEnter 2 to register\n"
+              "\tEnter 3 to exit\n"
+              )
+        while True:
+            user_input = input("Your selection: ")
 
-def get_auth_mode_input():
-    print("\n\nPlease select one of the modes below to authenticate:\n"
-          "\tEnter 1 to login\n"
-          "\tEnter 2 to register\n"
-          "\tEnter 3 to exit\n"
-          )
-    while True:
-        user_input = input("Your selection: ")
+            if not isinstance(user_input, str):  # Input has to be a valid string
+                print("The selection was invalid. Please enter a valid string.")
+                continue
 
-        if not isinstance(user_input, str):  # Input has to be a valid string
-            print("The selection was invalid. Please enter a valid string.")
-            continue
+            try:
+                user_input = int(user_input)  # Input has to be an integer
+            except ValueError:
+                print("The selection was invalid. Please enter an integer.")
+                continue
 
-        try:
-            user_input = int(user_input)  # Input has to be an integer
-        except ValueError:
-            print("The selection was invalid. Please enter an integer.")
-            continue
-
-        for auth_mode in AuthenticationMode:
-            if auth_mode.value == user_input:
-                return user_input
-        print("The selection was invalid. Please choose a valid option.")
+            for auth_mode in AuthenticationMode:
+                if auth_mode.value == user_input:
+                    return user_input
+            print("The selection was invalid. Please choose a valid option.")
 
