@@ -26,10 +26,8 @@ class AuthManager:
             if create_user_file:
                 # Create user.csv with headers
                 utils.write(self.__user_file_path, 'w', self.__user_display_field_list, self.__user_delimiter)
-
-            print("#### Auth manager is running. ####")
         except Exception as e:
-            print(f"Auth manager initialization failed: {e}")
+            print(f"\nAuth manager initialization failed: {e}")
 
     def run(self):
         auth_mode = AuthManager.get_auth_mode_input()
@@ -44,12 +42,12 @@ class AuthManager:
         username = input("Enter a unique username: ")
         if not utils.is_value_unique(self.__user_file_path, self.__user_delimiter,
                                           username, self.__user_display_field_list[0]):
-            print("Username already exists. User registration failed.")
+            print("\nUsername already exists. User registration failed.")
             return
         password = input("Enter a password: ")
         hashed_password = self.__hash_password(password)
         utils.write(self.__user_file_path, 'a', [username, hashed_password], self.__user_delimiter)
-        print("User registration successful.")
+        print("\nUser registration successful.")
         return username
 
     def __login(self):
@@ -59,13 +57,13 @@ class AuthManager:
         value_match = self.__match_credentials(username, hashed_password)
 
         if not bool(value_match[0]): # Matching username
-            print(f"No user with username '{username}'. Login failed.")
+            print(f"\nNo user with username '{username}'. Login failed.")
             return
         elif not bool(value_match[1]):
-            print(f"Password '{password} 'did not match. Login failed.")
+            print(f"\nPassword '{password} 'did not match. Login failed.")
             return
 
-        print("Login successful!")
+        print("\nLogin successful!")
         return username
 
     @staticmethod
@@ -81,23 +79,23 @@ class AuthManager:
         print("\n\nPlease select one of the modes below to authenticate:\n"
               "\tEnter 1 to login\n"
               "\tEnter 2 to register\n"
-              "\tEnter 3 to exit\n"
+              "\tEnter 3 to exit"
               )
         while True:
-            user_input = input("Your selection: ")
+            user_input = input("\nYour selection: ")
 
             if not isinstance(user_input, str):  # Input has to be a valid string
-                print("The selection was invalid. Please enter a valid string.")
+                print("\nThe selection was invalid. Please enter a valid string.")
                 continue
 
             try:
                 user_input = int(user_input)  # Input has to be an integer
             except ValueError:
-                print("The selection was invalid. Please enter an integer.")
+                print("\nThe selection was invalid. Please enter an integer.")
                 continue
 
             for auth_mode in AuthenticationMode:
                 if auth_mode.value == user_input:
                     return user_input
-            print("The selection was invalid. Please choose a valid option.")
+            print("\nThe selection was invalid. Please choose a valid option.")
 

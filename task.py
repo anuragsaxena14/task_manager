@@ -80,12 +80,12 @@ class Task:
     def updated_at(self, value):
         self.__updated_at = value
 
-    def __str__(self):
+    def __str__(self):  # This method overrides string method
         return "{}, {}, {}, {}, {}, {}".format(
             self.__id, self.__user_name, self.__desc, self.__state.name, self.__created_at, self.__updated_at
         )
 
     @staticmethod
-    def field_to_header_mapping():
+    def field_to_header_mapping():  # This method maps class fields to the display headers in the csv file.
         return [('__id', 'Task Id'), ('__user_name', 'Task Owner'), ('__desc', 'Task Description'),
                 ('__state', 'Task State'), ('__created_at', 'Created At'), ('__updated_at', 'Updated At')]

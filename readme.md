@@ -6,22 +6,25 @@ In today’s world, individuals often need to keep track of various tasks in a s
 ## Objectives
 1. Design and implement a user authentication system (login and registration).
 2. Create a task management system that allows users to:
-    - Add tasks
-    - View tasks
-    - Mark tasks as completed
-    - Delete tasks
+   - Add tasks
+   - View tasks
+   - Mark tasks as completed
+   - Delete tasks
 3. Use file handling to store user credentials and tasks persistently.
 4. Create an interactive menu-driven interface to manage tasks.
 
 ## Installation
-Clone the repository:
 ```bash
-git clone https://github.com/your-username/task-manager.git
+git clone https://github.com/anuragsaxena14/task_manager.git
 cd task-manager
-python3.12 -m venv venv  
+python3 -m venv venv  
 source venv/bin/activate  
-python3.12 -m pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
+python main.py
+```
 
+## Directory Structure :
+```
 task-manager/
 ├── main.py                      # Main program entry point
 ├── auth_manager.py              # Handles User authentication
@@ -35,5 +38,4 @@ task-manager/
 ├── venv                         # Virtual environment to run locally
 ├── requirements.txt             # Dependencies required to run project
 └── readme.md                    # Project Documentation
-
-
+```
