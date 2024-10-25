@@ -1,4 +1,4 @@
-from auth_manager import AuthManager
+from auth_manager import AuthenticationManager
 from task_manager import TaskManager
 
 if __name__ == "__main__":
@@ -6,7 +6,7 @@ if __name__ == "__main__":
     print("\n\n#######################################")
     print("#                Welcome!             #")
     print("#######################################")
-    auth_manager = AuthManager()  # Start the auth manager
+    auth_manager = AuthenticationManager()  # Start the auth manager
     username = auth_manager.run()  # Auth manager will return an authenticated username
     if username:  # No username means auth failed or the user chose to exit
         task_manager = TaskManager()

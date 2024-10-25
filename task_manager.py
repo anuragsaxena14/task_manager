@@ -9,7 +9,7 @@ class TaskManagerAction(Enum):
     LIST_TASKS = 2
     COMPLETE_TASK = 3
     DELETE_TASK = 4
-    USER_LOGOUT = 5
+    EXIT = 5
 
 
 class TaskManager:
@@ -98,9 +98,7 @@ class TaskManager:
 
             # Save task's static details
             utils.write(self.__task_file_path, 'a',
-                             [self.__max_task_id + 1, user_name, task_desc,  utils.get_curr_time()],
-                             self.__task_delimiter
-                             )
+                        [self.__max_task_id + 1, user_name, task_desc,  utils.get_curr_time()], self.__task_delimiter)
             self.__max_task_id += 1
             print(f"\nTask #{self.__max_task_id} added successfully.")
         except Exception as e:
@@ -113,12 +111,11 @@ class TaskManager:
                 self.__task_file_path,
                 self.__task_delimiter,
                 self.__task_static_field_list,
-                'Task Owner',
+                self.__task_static_field_list[1],
                 user_name
             )
             task_updates = utils.get_variable_values(self.__task_update_file_path, self.__task_delimiter,
-                                                          self.__task_variable_field_list)
-
+                                                     self.__task_variable_field_list)
             if not task_updates:
                 tasks_to_show = all_tasks
             else:
@@ -138,10 +135,13 @@ class TaskManager:
 
     def __update_task(self, new_state):
         try:
+            #   0. User has any PENDING/COMPLETED tasks
             #   1. Task id can not be empty
             #   2. Task id has to be an integer
             #   3. Task id can not be < 1
             #   4. Task id can not be greater than max task id currently in the system
+            #   5. Task id has to be of a task created by the user
+
             print("\nPlease enter the task id: ")
             while True:
                 task_id = input().strip()
@@ -157,7 +157,7 @@ class TaskManager:
                     print("\nTask id can not be less than 1. Please re-enter: ")
                     continue
                 if task_id > int(self.__max_task_id):
-                    print("\nInvalid task id. No such task is present. Please re-enter: ")
+                    print("\nNo task found. Please re-enter: ")
                     continue
                 break
 
@@ -200,7 +200,7 @@ class TaskManager:
                 self.__update_task(TaskState.COMPLETED.name)
             elif action_input == TaskManagerAction.DELETE_TASK.value:
                 self.__update_task(TaskState.DELETED.name)
-            elif action_input == TaskManagerAction.USER_LOGOUT.value:
+            elif action_input == TaskManagerAction.EXIT.value:
                 print("\nUser logged out.")
                 break
             else:

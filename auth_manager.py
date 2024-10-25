@@ -10,7 +10,7 @@ class AuthenticationMode(Enum):
     NONE = 3
 
 
-class AuthManager:
+class AuthenticationManager:
 
     # This file would store the user details like username, password.
     __user_file_path = "./user.csv"
@@ -30,7 +30,7 @@ class AuthManager:
             print(f"\nAuth manager initialization failed: {e}")
 
     def run(self):
-        auth_mode = AuthManager.get_auth_mode_input()
+        auth_mode = AuthenticationManager.get_auth_mode_input()
 
         if auth_mode == AuthenticationMode.LOGIN.value:
             return self.__login()
