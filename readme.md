@@ -1,4 +1,10 @@
 # Task Manager
+```
+PG Jupyter Lab Notebook
+Download Link: https://vocproxy-1-19.us-west-2.vocareum.com/files/work/task_manager.ipynb
+
+Shareable Link: https://vocproxy-1-19.us-west-2.vocareum.com/lab/tree/work/task_manager.ipynb
+```
 
 ## Problem Statement
 In today’s world, individuals often need to keep track of various tasks in a structured way. You are tasked with building a Task Manager that allows users to manage their tasks. The system should include user authentication, meaning each user has to login with a username and password. Once logged in, users can create, view, update, and delete their tasks. Each user’s tasks should be stored separately, and only the authenticated user can access their tasks.
