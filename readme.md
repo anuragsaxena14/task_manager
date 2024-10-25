@@ -14,7 +14,6 @@ In today’s world, individuals often need to keep track of various tasks in a s
 4. Create an interactive menu-driven interface to manage tasks.
 
 ## Installation
-Clone the repository:
 ```bash
 git clone https://github.com/your-username/task-manager.git
 cd task-manager
